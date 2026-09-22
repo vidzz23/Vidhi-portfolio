@@ -441,21 +441,75 @@
       });
     });
 
-    function mailtoFallback(data) {
-      var subject = "Enquiry from " + data.name + (data.company ? " (" + data.company + ")" : "") +
-                    " — " + data.reason;
-      var body = [
-        data.message, "",
-        "—", "From: " + data.name,
-        "Email: " + data.email,
-        data.company ? "Company: " + data.company : "",
-        "Regarding: " + data.reason,
-        "Sent from your portfolio site"
-      ].filter(Boolean).join("\n");
+    function composed(data) {
+      return {
+        subject: "Enquiry from " + data.name + (data.company ? " (" + data.company + ")" : "") +
+                 " — " + data.reason,
+        body: [
+          data.message, "",
+          "—", "From: " + data.name,
+          "Email: " + data.email,
+          data.company ? "Company: " + data.company : "",
+          "Regarding: " + data.reason
+        ].filter(Boolean).join("\n")
+      };
+    }
 
-      window.location.href = "mailto:" + MY_EMAIL +
-        "?subject=" + encodeURIComponent(subject) +
-        "&body=" + encodeURIComponent(body);
+    /* No Google Form set up yet, so there is no inbox to post to. Open the
+       sender's mail app AND show the message on the page — plenty of people
+       have no mail app configured, and a button that silently does nothing
+       is worse than no button. */
+    function emailFallback(data) {
+      var msg = composed(data);
+
+      enqStatus.className = "enq-status ok";
+      enqStatus.innerHTML = "";
+
+      var line = document.createElement("p");
+      line.style.marginBottom = "0.7rem";
+      line.textContent = "Opening your email app… if nothing happens, send this to " + MY_EMAIL + ":";
+      enqStatus.appendChild(line);
+
+      var box = document.createElement("textarea");
+      box.readOnly = true;
+      box.rows = 6;
+      box.value = "To: " + MY_EMAIL + "\nSubject: " + msg.subject + "\n\n" + msg.body;
+      box.style.cssText =
+        "width:100%;font-family:inherit;font-size:0.82rem;line-height:1.5;color:#fff;" +
+        "background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);" +
+        "border-radius:10px;padding:0.7rem 0.8rem;resize:vertical;";
+      enqStatus.appendChild(box);
+
+      var copy = document.createElement("button");
+      copy.type = "button";
+      copy.textContent = "Copy message";
+      copy.style.cssText =
+        "margin-top:0.6rem;font-family:inherit;font-size:0.8rem;font-weight:600;" +
+        "padding:0.5rem 1.1rem;border-radius:999px;border:1px solid rgba(255,255,255,0.45);" +
+        "background:transparent;color:#fff;cursor:pointer;";
+      copy.addEventListener("click", function () {
+        box.select();
+        var ok = false;
+        try { ok = document.execCommand("copy"); } catch (e) {}
+        if (!ok && navigator.clipboard) {
+          navigator.clipboard.writeText(box.value).then(function () {
+            copy.textContent = "Copied";
+          });
+          return;
+        }
+        copy.textContent = ok ? "Copied" : "Select the text above and copy";
+      });
+      enqStatus.appendChild(copy);
+
+      /* try the mail app too — harmless if it does nothing */
+      var link = document.createElement("a");
+      link.href = "mailto:" + MY_EMAIL +
+        "?subject=" + encodeURIComponent(msg.subject) +
+        "&body=" + encodeURIComponent(msg.body);
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(function () { link.remove(); }, 1000);
     }
 
     function postToGoogle(data) {
@@ -519,9 +573,7 @@
       fields.forEach(function (el) { data[el.name] = el.value.trim(); });
 
       if (!GOOGLE_FORM.action) {
-        enqStatus.className = "enq-status ok";
-        enqStatus.textContent = "Opening your email app with this message ready to send…";
-        mailtoFallback(data);
+        emailFallback(data);
         return;
       }
 
