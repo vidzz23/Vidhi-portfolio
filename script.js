@@ -62,6 +62,13 @@
 
   var MY_EMAIL = "vidzz200211@gmail.com";
 
+  /* --- 4. Email delivery (used when no Google Form is set) ----------------
+     FormSubmit posts the enquiry straight to the inbox above. No account,
+     no dashboard — but the address has to be confirmed once, via a link
+     they email you the first time someone submits.
+     Set this to "" to go back to the copy-it-yourself fallback. */
+  var FORM_ENDPOINT = "https://formsubmit.co/ajax/" + MY_EMAIL;
+
   /* ========================= end of the edit-me bit ======================== */
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -571,6 +578,49 @@
 
       var data = {};
       fields.forEach(function (el) { data[el.name] = el.value.trim(); });
+
+      /* Preferred: post it straight to the inbox */
+      if (!GOOGLE_FORM.action && FORM_ENDPOINT) {
+        enqSubmit.disabled = true;
+        enqSubmit.classList.add("busy");
+
+        var msg = composed(data);
+
+        fetch(FORM_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({
+            name: data.name,
+            email: data.email,
+            company: data.company || "—",
+            "what it's about": data.reason,
+            message: data.message,
+            _subject: msg.subject,
+            _template: "table",
+            _captcha: "false"
+          })
+        })
+          .then(function (r) { return r.json().catch(function () { return {}; }); })
+          .then(function (res) {
+            enqSubmit.disabled = false;
+            enqSubmit.classList.remove("busy");
+
+            if (res && String(res.success) === "true") {
+              enqForm.reset();
+              enqStatus.className = "enq-status ok";
+              enqStatus.textContent = "Thank you — that's with me. I'll reply within a day.";
+            } else {
+              /* not delivered — never leave someone with a dead button */
+              emailFallback(data);
+            }
+          })
+          .catch(function () {
+            enqSubmit.disabled = false;
+            enqSubmit.classList.remove("busy");
+            emailFallback(data);
+          });
+        return;
+      }
 
       if (!GOOGLE_FORM.action) {
         emailFallback(data);
