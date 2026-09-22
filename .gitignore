@@ -1,0 +1,13 @@
+# OS noise
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# editor
+.vscode/
+.idea/
+
+# never commit secrets
+.env
+.env.*
+!.env.example
