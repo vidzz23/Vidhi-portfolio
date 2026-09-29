@@ -230,10 +230,10 @@
   /* ---------- Hero typewriter ---------- */
   var typed = $("#typed");
   var PHRASES = [
-    "the reporting layer.",
-    "the automations.",
-    "the CRM engine.",
-    "the systems behind the marketing."
+    "the AI workflows.",
+    "the proposal engine.",
+    "the tools we run on.",
+    "the systems behind business development."
   ];
 
   if (typed) {
