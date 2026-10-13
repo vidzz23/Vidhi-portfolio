@@ -193,6 +193,11 @@
     revealEls.forEach(function (el) { revealObserver.observe(el); });
   }
 
+  /* ---------- Demo clips: no autoplay for people who prefer less motion ---------- */
+  if (reduced) {
+    $(".demo-phone video").forEach(function (v) { v.removeAttribute("autoplay"); v.pause(); v.controls = true; });
+  }
+
   /* ---------- Counting metrics ---------- */
   function runCount(el) {
     var target = parseFloat(el.dataset.count);

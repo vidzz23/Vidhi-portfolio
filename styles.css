@@ -419,6 +419,8 @@ html.dark .icon-moon { display: none; }
   min-height: 1.6em;
 }
 .hero-typeline .typed { color: var(--ink); font-weight: 600; }
+/* On phones the longest phrase wraps to two lines; keep room for both so the text below doesn't jump. */
+@media (max-width: 600px) { .hero-typeline { min-height: 3.4em; } }
 .caret {
   display: inline-block;
   width: 2px;
@@ -789,6 +791,39 @@ html.dark .sys-stack span { color: var(--accent-light); }
   line-height: 1.5;
 }
 .sys-note svg { width: 14px; height: 14px; flex: none; margin-top: 0.25rem; }
+
+/* Ala demo clip, in a phone frame beside the text */
+.sys-split {
+  display: grid;
+  grid-template-columns: 1fr 210px;
+  gap: 1.8rem;
+  align-items: start;
+}
+.demo-phone { margin: 0; }
+.demo-phone video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 2;
+  object-fit: cover;
+  border: 6px solid #12211f;
+  outline: 1px solid var(--line-strong);
+  border-radius: 28px;
+  background: var(--bg-alt);
+  box-shadow: var(--shadow-lg);
+}
+.demo-phone figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-align: center;
+  margin-top: 0.6rem;
+}
+@media (max-width: 780px) {
+  .sys-split { grid-template-columns: 1fr; }
+  .demo-phone { width: min(240px, 70%); margin: 0 auto; }
+}
 
 /* Project screenshots */
 .shots {
