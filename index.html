@@ -705,6 +705,14 @@
     document.body.classList.add("leaving");
     setTimeout(function () { window.location.href = DEST; }, reduced ? 0 : 420);
   }
+  /* Coming back with the Back button, the browser restores this page as it was when it left:
+     faded out and locked. Show the finished dashboard again so Enter works. */
+  window.addEventListener("pageshow", function (e) {
+    if (!e.persisted) return;
+    entered = false;
+    document.body.classList.remove("leaving");
+    runAll(true);
+  });
   enter.addEventListener("click", go);
   skip.addEventListener("click", go);
   document.addEventListener("keydown", function (e) {
