@@ -195,8 +195,26 @@
 
   /* ---------- Demo clips: no autoplay for people who prefer less motion ---------- */
   if (reduced) {
-    $(".demo-phone video").forEach(function (v) { v.removeAttribute("autoplay"); v.pause(); v.controls = true; });
+    $$(".demo-phone video").forEach(function (v) { v.removeAttribute("autoplay"); v.pause(); v.controls = true; });
   }
+
+  /* Browsers only autoplay muted video, so the clip starts silent; this button restarts it with sound. */
+  $$(".demo-phone").forEach(function (fig) {
+    var v = fig.querySelector("video"), btn = fig.querySelector(".demo-sound");
+    if (!v || !btn) return;
+    function sync() {
+      btn.textContent = v.muted ? "🔊 Tap for sound" : "🔇 Mute";
+      btn.setAttribute("aria-pressed", String(!v.muted));
+    }
+    btn.addEventListener("click", function () {
+      if (v.muted) { v.muted = false; v.currentTime = 0; }
+      else v.muted = true;
+      var p = v.play();
+      if (p && p.catch) p.catch(function () {});
+      sync();
+    });
+    v.addEventListener("volumechange", sync);
+  });
 
   /* ---------- Counting metrics ---------- */
   function runCount(el) {
